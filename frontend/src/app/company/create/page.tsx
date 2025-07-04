@@ -96,7 +96,7 @@ export default function CreateCompanyPage() {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Nautanki Inc."
+              placeholder="e.g., Stark Industries."
               required
             />
           </div>

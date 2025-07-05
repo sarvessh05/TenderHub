@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { pool } from '../config/db';
 import { AuthenticatedRequest } from '../middleware/verifyToken';
 
+// Submit proposal to a tender
 export const applyToTender = async (
   req: AuthenticatedRequest,
   res: Response
@@ -35,6 +36,7 @@ export const applyToTender = async (
   }
 };
 
+// Get all proposals for a specific tender
 export const getProposalsForTender = async (
   req: AuthenticatedRequest,
   res: Response
@@ -58,6 +60,7 @@ export const getProposalsForTender = async (
   }
 };
 
+// Get all proposals submitted by the authenticated user's company
 export const getProposalsByCompany = async (
   req: AuthenticatedRequest,
   res: Response

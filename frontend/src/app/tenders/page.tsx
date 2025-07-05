@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -27,9 +27,14 @@ export default function TendersPage() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
+    if (!API_BASE) {
+      toast.error("API Base URL is not defined.");
+      return;
+    }
+
     const fetchTenders = async () => {
       try {
         const res = await axios.get(`${API_BASE}/api/tender/all?page=${page}&limit=3`);
@@ -44,14 +49,18 @@ export default function TendersPage() {
     };
 
     fetchTenders();
-  }, [page]);
+  }, [page, API_BASE]);
 
   const applyToTender = async (tenderId: string) => {
     const token = localStorage.getItem('token');
-    if (!token) return toast.error('Login required to apply.');
+    if (!token) {
+      toast.error('Login required to apply.');
+      return;
+    }
 
     if (!proposalText || !proposalBudget || !proposalTimeline) {
-      return toast.error('Please fill in all fields.');
+      toast.error('Please fill in all fields.');
+      return;
     }
 
     try {

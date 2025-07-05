@@ -22,12 +22,13 @@ export default function DeleteCompanyPage() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/company/delete`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/delete`, {
+  method: "DELETE",
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
 
       const data = await res.json();
 

@@ -21,23 +21,31 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (!token) {
       toast.error("You are not logged in.");
       router.push("/auth/login");
       return;
     }
 
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_BASE}/api/company/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setCompany(res.data.company))
-      .catch((err) => {
+    const fetchCompany = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setCompany(res.data.company);
+      } catch (err) {
         console.error("Company fetch error:", err);
         toast.error("Failed to load your company profile.");
-      });
+      }
+    };
+
+    fetchCompany();
   }, [router]);
 
   if (!company) {
@@ -69,7 +77,9 @@ export default function DashboardPage() {
             )}
 
             <div className="text-center md:text-left">
-              <h1 className="text-3xl font-bold text-slate-800">{company.name}</h1>
+              <h1 className="text-3xl font-bold text-slate-800">
+                {company.name}
+              </h1>
               <p className="text-slate-500 text-lg">{company.industry}</p>
             </div>
           </div>

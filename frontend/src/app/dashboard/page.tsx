@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import Image from 'next/image';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import Image from "next/image";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Company {
   name: string;
@@ -20,24 +20,25 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      toast.error('You are not logged in.');
+      toast.error("You are not logged in.");
+      router.push("/auth/login");
       return;
     }
 
     axios
-      .get('http://localhost:5000/api/company/me', {
+      .get(`${process.env.NEXT_PUBLIC_API_BASE}/api/company/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setCompany(res.data.company))
       .catch((err) => {
-        console.error(err);
-        toast.error('Failed to load your company profile.');
+        console.error("Company fetch error:", err);
+        toast.error("Failed to load your company profile.");
       });
-  }, []);
+  }, [router]);
 
   if (!company) {
     return (
@@ -51,7 +52,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4 py-10">
       <Card className="w-full max-w-5xl rounded-2xl shadow-md border-none">
         <CardContent className="p-10 space-y-8">
-          {/* Company Header */}
+          {/* Header */}
           <div className="flex flex-col md:flex-row items-center gap-6">
             {company.logo_url ? (
               <Image
@@ -79,7 +80,7 @@ export default function DashboardPage() {
           {/* Action Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <Button
-              onClick={() => router.push('/company/edit')}
+              onClick={() => router.push("/company/edit")}
               className="w-full"
               variant="default"
             >
@@ -87,7 +88,7 @@ export default function DashboardPage() {
             </Button>
 
             <Button
-              onClick={() => router.push('/company/upload-logo')}
+              onClick={() => router.push("/company/upload-logo")}
               className="w-full"
               variant="secondary"
             >
@@ -95,7 +96,7 @@ export default function DashboardPage() {
             </Button>
 
             <Button
-              onClick={() => router.push('/tenders')}
+              onClick={() => router.push("/tenders")}
               className="w-full"
               variant="default"
             >
@@ -103,7 +104,7 @@ export default function DashboardPage() {
             </Button>
 
             <Button
-              onClick={() => router.push('/proposals')}
+              onClick={() => router.push("/proposals")}
               className="w-full"
               variant="outline"
             >
@@ -113,7 +114,8 @@ export default function DashboardPage() {
             <Button
               onClick={() => {
                 localStorage.clear();
-                router.push('/auth/login');
+                toast.success("Logged out successfully.");
+                router.push("/auth/login");
               }}
               className="w-full"
               variant="destructive"

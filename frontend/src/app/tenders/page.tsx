@@ -25,16 +25,21 @@ export default function TendersPage() {
   const [proposalBudget, setProposalBudget] = useState('');
   const [proposalTimeline, setProposalTimeline] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/tender/all?page=${page}&limit=3`);
+        const res = await axios.get(`${API_BASE}/api/tender/all?page=${page}&limit=3`);
         setTenders(res.data.tenders);
         setTotalPages(res.data.totalPages);
       } catch (err) {
         console.error('Error fetching tenders:', err);
         toast.error('Failed to load tenders');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -51,8 +56,9 @@ export default function TendersPage() {
 
     try {
       setSubmitting(true);
+
       await axios.post(
-        'http://localhost:5000/api/application/apply',
+        `${API_BASE}/api/application/apply`,
         {
           tender_id: tenderId,
           proposal: proposalText,
@@ -77,6 +83,14 @@ export default function TendersPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-500 text-lg">
+        Loading tenders...
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 space-y-6">
       <h1 className="text-3xl font-bold text-slate-800 mb-4">📋 Browse Tenders</h1>
@@ -88,7 +102,9 @@ export default function TendersPage() {
               <h2 className="text-xl font-semibold text-slate-800">{t.title}</h2>
               <p className="text-slate-600 mt-1">{t.description}</p>
               <p className="text-sm text-slate-500 mt-2">💰 Budget: ₹{t.budget}</p>
-              <p className="text-sm text-slate-500">📅 Deadline: {new Date(t.deadline).toDateString()}</p>
+              <p className="text-sm text-slate-500">
+                📅 Deadline: {new Date(t.deadline).toDateString()}
+              </p>
             </div>
 
             <Button

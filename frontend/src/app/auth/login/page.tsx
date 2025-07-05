@@ -16,7 +16,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -34,7 +34,7 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      const companyRes = await fetch("http://localhost:5000/api/company/me", {
+      const companyRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/me`, {
         headers: {
           Authorization: `Bearer ${data.token}`,
         },

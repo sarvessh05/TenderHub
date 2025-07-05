@@ -33,7 +33,7 @@ export default function CreateCompanyPage() {
     try {
       setLoading(true);
 
-      const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/upload-logo`, {
+      const createRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export default function CreateCompanyPage() {
       const logoForm = new FormData();
       logoForm.append("logo", logo);
 
-      const uploadRes = await fetch("http://localhost:5000/api/company/upload-logo", {
+      const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/upload-logo`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

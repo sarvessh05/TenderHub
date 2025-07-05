@@ -15,30 +15,42 @@ export default function EditCompanyPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Fetch current company details on component mount
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!token) {
+      toast.error("Authentication token missing.");
+      router.push("/auth/login");
+      return;
+    }
 
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const company = data.company;
-        if (company) {
-          setName(company.name || "");
-          setIndustry(company.industry || "");
-          setDescription(company.description || "");
-        } else {
-          toast.error("No company data found.");
+    const fetchCompany = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.company) {
+          toast.error(data.message || "Company data not found.");
+          return;
         }
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-        toast.error("Failed to load company details.");
-      });
-  }, []);
 
+        const company = data.company;
+        setName(company.name || "");
+        setIndustry(company.industry || "");
+        setDescription(company.description || "");
+      } catch (err) {
+        console.error("Company fetch error:", err);
+        toast.error("Failed to load company details.");
+      }
+    };
+
+    fetchCompany();
+  }, [router]);
+
+  // Handle form submission for company update
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 

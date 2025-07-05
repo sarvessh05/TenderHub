@@ -1,34 +1,44 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { pool } from '../config/db';
+import { AuthenticatedRequest } from '../middleware/verifyToken';
 
-export const applyToTender = async (req: any, res: Response) => {
-    try {
-        const userId = req.user.id;
-        const { tender_id, proposal, proposed_budget, proposed_timeline } =req.body;
+export const applyToTender = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const { tender_id, proposal, proposed_budget, proposed_timeline } = req.body;
 
-        // Find the company ID of this user
-        const companyRes = await pool.query(`SELECT id FROM companies WHERE user_id = $1`, [userId]);
+    const companyRes = await pool.query(
+      `SELECT id FROM companies WHERE user_id = $1`,
+      [userId]
+    );
 
-        if (companyRes.rows.length === 0) {
-            return res.status(404).json({ message: 'Company not found' });
-        }
-        const comapnyId = companyRes.rows[0].id;
-
-        // Insert application
-        const result =  await pool.query(
-            `INSERT INTO applications (company_id, tender_id, proposal, proposed_budget, proposed_timeline)
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [comapnyId, tender_id, proposal, proposed_budget, proposed_timeline]
-        );
-
-        res.status(201).json({ application: result.rows[0] });
-    } catch (err) {
-        console.error('Apply Error:', err);
-        res.status(500).json({ message: 'Error submitting proposal' });
+    if (companyRes.rows.length === 0) {
+      res.status(404).json({ message: 'Company not found' });
+      return;
     }
+
+    const companyId = companyRes.rows[0].id;
+
+    const result = await pool.query(
+      `INSERT INTO applications (company_id, tender_id, proposal, proposed_budget, proposed_timeline)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [companyId, tender_id, proposal, proposed_budget, proposed_timeline]
+    );
+
+    res.status(201).json({ application: result.rows[0] });
+  } catch (err) {
+    console.error('Apply Error:', err);
+    res.status(500).json({ message: 'Error submitting proposal' });
+  }
 };
 
-export const getProposalsForTender = async (req: Request, res: Response) => {
+export const getProposalsForTender = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
     const { tenderId } = req.params;
 
@@ -48,13 +58,21 @@ export const getProposalsForTender = async (req: Request, res: Response) => {
   }
 };
 
-export const getProposalsByCompany = async (req: any, res: Response) => {
+export const getProposalsByCompany = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
 
-    const companyRes = await pool.query(`SELECT id FROM companies WHERE user_id = $1`, [userId]);
+    const companyRes = await pool.query(
+      `SELECT id FROM companies WHERE user_id = $1`,
+      [userId]
+    );
+
     if (companyRes.rows.length === 0) {
-      return res.status(404).json({ message: 'Company not found' });
+      res.status(404).json({ message: 'Company not found' });
+      return;
     }
 
     const companyId = companyRes.rows[0].id;

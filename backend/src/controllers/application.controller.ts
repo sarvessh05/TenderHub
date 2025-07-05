@@ -2,15 +2,23 @@ import { Response } from 'express';
 import { pool } from '../config/db';
 import { AuthenticatedRequest } from '../middleware/verifyToken';
 
-// Submit proposal to a tender
+/**
+ * Submit a proposal to a tender by the authenticated company user
+ */
 export const applyToTender = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  try {
-    const userId = req.user?.id;
-    const { tender_id, proposal, proposed_budget, proposed_timeline } = req.body;
+  const userId = req.user?.id;
 
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: No user ID found in token.' });
+    return;
+  }
+
+  const { tender_id, proposal, proposed_budget, proposed_timeline } = req.body;
+
+  try {
     const companyRes = await pool.query(
       `SELECT id FROM companies WHERE user_id = $1`,
       [userId]
@@ -36,14 +44,21 @@ export const applyToTender = async (
   }
 };
 
-// Get all proposals for a specific tender
+/**
+ * Get all proposals for a specific tender
+ */
 export const getProposalsForTender = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  try {
-    const { tenderId } = req.params;
+  const { tenderId } = req.params;
 
+  if (!tenderId) {
+    res.status(400).json({ message: 'Missing tenderId in parameters.' });
+    return;
+  }
+
+  try {
     const result = await pool.query(
       `SELECT a.id, c.name AS company_name, a.proposal, a.proposed_budget, a.proposed_timeline, a.created_at
        FROM applications a
@@ -60,14 +75,21 @@ export const getProposalsForTender = async (
   }
 };
 
-// Get all proposals submitted by the authenticated user's company
+/**
+ * Get all proposals submitted by the authenticated user's company
+ */
 export const getProposalsByCompany = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  try {
-    const userId = req.user?.id;
+  const userId = req.user?.id;
 
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: No user ID found in token.' });
+    return;
+  }
+
+  try {
     const companyRes = await pool.query(
       `SELECT id FROM companies WHERE user_id = $1`,
       [userId]

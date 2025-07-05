@@ -33,7 +33,7 @@ export default function CreateCompanyPage() {
     try {
       setLoading(true);
 
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/company/create, {
+      const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/upload-logo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

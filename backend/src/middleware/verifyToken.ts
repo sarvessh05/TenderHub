@@ -1,9 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-// Custom interface extending Express's Request to hold user data
+// Define a custom interface for the decoded token payload
+interface DecodedToken extends JwtPayload {
+  id: string;
+  email?: string; // add other fields if present in your JWT
+}
+
+// Extend the Express Request to include a typed user field
 export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload | string; // Define as per what your JWT contains
+  user?: DecodedToken;
 }
 
 export const verifyToken = (
@@ -13,7 +19,6 @@ export const verifyToken = (
 ): void => {
   const authHeader = req.headers.authorization;
 
-  // No Authorization header or malformed
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({ message: 'Unauthorized. No token provided.' });
     return;
@@ -29,9 +34,9 @@ export const verifyToken = (
   }
 
   try {
-    const decoded = jwt.verify(token, secret);
-    req.user = decoded; // Save decoded token into req.user
-    next(); // Pass control to next middleware/route handler
+    const decoded = jwt.verify(token, secret) as DecodedToken;
+    req.user = decoded; // Now properly typed
+    next();
   } catch (err) {
     res.status(401).json({ message: 'Unauthorized. Invalid token.' });
   }

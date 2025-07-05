@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Proposal {
   id: string;
@@ -17,31 +17,43 @@ interface Proposal {
 export default function MyProposalsPage() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
+
     if (!token) {
-      setError('Please log in to view your proposals.');
+      setError("You must be logged in to view proposals.");
+      setLoading(false);
       return;
     }
 
     axios
-      .get('http://localhost:5000/api/application/my-proposals', {
+      .get(`${process.env.NEXT_PUBLIC_API_BASE}/api/application/my-proposals`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setProposals(res.data.proposals))
       .catch((err) => {
-        console.error('Fetch error:', err);
-        setError('Failed to fetch proposals.');
-        toast.error('Something went wrong while loading proposals.');
-      });
+        console.error("Proposal fetch error:", err);
+        toast.error("Failed to fetch proposals.");
+        setError("Something went wrong while loading proposals.");
+      })
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-500 text-lg">
+        Loading proposals...
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-600 font-medium text-lg">
+      <div className="min-h-screen flex items-center justify-center text-red-600 text-lg font-medium">
         {error}
       </div>
     );
@@ -69,9 +81,9 @@ export default function MyProposalsPage() {
                 </h2>
                 <span className="text-sm text-slate-500">
                   {new Date(p.created_at).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
                   })}
                 </span>
               </div>

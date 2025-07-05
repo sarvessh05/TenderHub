@@ -79,7 +79,9 @@ export default function Sidebar() {
                 : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             }`}
           >
-            <Icon size={20} title={name} />
+            <span title={name}>
+              <Icon size={20} aria-label={name} />
+            </span>
             {name}
           </Link>
         ))}

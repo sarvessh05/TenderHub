@@ -33,7 +33,7 @@ export default function CreateCompanyPage() {
     try {
       setLoading(true);
 
-      const createRes = await fetch("http://localhost:5000/api/company/create", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -25,9 +25,13 @@ export default function EditCompanyPage() {
       .then((res) => res.json())
       .then((data) => {
         const company = data.company;
-        setName(company.name || "");
-        setIndustry(company.industry || "");
-        setDescription(company.description || "");
+        if (company) {
+          setName(company.name || "");
+          setIndustry(company.industry || "");
+          setDescription(company.description || "");
+        } else {
+          toast.error("No company data found.");
+        }
       })
       .catch((err) => {
         console.error("Fetch error:", err);
@@ -46,7 +50,8 @@ export default function EditCompanyPage() {
 
     try {
       setLoading(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/update`, { 
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/update`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -56,6 +61,7 @@ export default function EditCompanyPage() {
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         toast.error(data.message || "Update failed.");
         return;

@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
-import cors from "cors";
+import cors from 'cors';
+
 import authRoutes from './routes/auth.routes';
 import companyRoutes from './routes/company.routes';
 import tenderRoutes from './routes/tender.routes';
@@ -11,29 +12,29 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Allows reading JSON in req.body
+// ✅ Middleware to parse JSON
 app.use(express.json());
 
-// ✅ Enable CORS for frontend
+// ✅ CORS setup (update origin for production)
 app.use(cors({
-  origin: "http://localhost:3000",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// ✅ Mount routes
+// ✅ Base Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/tender', tenderRoutes);
 app.use('/api/application', applicationRoutes);
 
-// ✅ Health check
-app.get('/', (req: Request, res: Response) => {
-  res.send('Tender Management API is running 🚀');
+// ✅ Health Check
+app.get('/', (_req: Request, res: Response) => {
+  res.send('🚀 Tender Management API is up and running!');
 });
 
-// ✅ Start server
+// ✅ Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });

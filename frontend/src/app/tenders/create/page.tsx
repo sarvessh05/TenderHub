@@ -18,6 +18,8 @@ export default function CreateTenderPage() {
   const [timeline, setTimeline] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -34,7 +36,7 @@ export default function CreateTenderPage() {
       setLoading(true);
 
       await axios.post(
-        'http://localhost:5000/api/tender/create',
+        `${API_BASE}/api/tender/create`,
         {
           title,
           description,

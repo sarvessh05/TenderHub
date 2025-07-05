@@ -18,12 +18,13 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^20.0.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.0"
-  }
+  "@types/bcrypt": "^5.0.2",
+  "@types/cors": "^2.8.19",
+  "@types/express": "^5.0.3",
+  "@types/jsonwebtoken": "^9.0.10",
+  "@types/node": "^24.0.7",
+  "@types/pg": "^8.6.6",
+  "ts-node-dev": "^2.0.0",
+  "typescript": "^5.8.3"
+}
 }

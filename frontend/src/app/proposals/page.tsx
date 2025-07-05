@@ -29,7 +29,7 @@ export default function MyProposalsPage() {
     }
 
     axios
-      .get(`${process.env.NEXT_PUBLIC_API_BASE}/api/application/my-proposals`, {
+      .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/application/my-proposals`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

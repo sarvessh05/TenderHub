@@ -1,17 +1,30 @@
 import { Request, Response } from 'express';
 import { pool } from '../config/db';
 import { supabase } from '../utils/supabaseClient';
+import { AuthenticatedRequest } from '../middleware/verifyToken';
 
-// @desc Create a company profile
-export const createCompany = async (req: any, res: Response) => {
+/**
+ * Create a company profile
+ */
+export const createCompany = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: No user ID.' });
+    return;
+  }
+
+  const { name, industry, description, logo_url } = req.body;
+
+  if (!name || !industry || !description) {
+    res.status(400).json({ message: 'All fields are required.' });
+    return;
+  }
+
   try {
-    const { name, industry, description, logo_url } = req.body;
-    const userId = req.user.id;
-
-    if (!name || !industry || !description) {
-      return res.status(400).json({ message: 'All fields are required.' });
-    }
-
     const result = await pool.query(
       `
       INSERT INTO companies (user_id, name, industry, description, logo_url)
@@ -21,43 +34,65 @@ export const createCompany = async (req: any, res: Response) => {
       [userId, name, industry, description, logo_url || null]
     );
 
-    return res.status(201).json({
+    res.status(201).json({
       message: 'Company created successfully',
       company: result.rows[0],
     });
   } catch (err) {
     console.error('Create Company Error:', err);
-    return res.status(500).json({ message: 'Server error while creating company' });
+    res.status(500).json({ message: 'Server error while creating company' });
   }
 };
 
-// @desc Get company profile of logged-in user
-export const getMyCompany = async (req: any, res: Response) => {
-  try {
-    const userId = req.user.id;
+/**
+ * Get company profile of the logged-in user
+ */
+export const getMyCompany = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const userId = req.user?.id;
 
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: No user ID.' });
+    return;
+  }
+
+  try {
     const result = await pool.query(
       `SELECT * FROM companies WHERE user_id = $1`,
       [userId]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'No company profile found.' });
+      res.status(404).json({ message: 'No company profile found.' });
+      return;
     }
 
-    return res.status(200).json({ company: result.rows[0] });
+    res.status(200).json({ company: result.rows[0] });
   } catch (err) {
     console.error('Get Company Error:', err);
-    return res.status(500).json({ message: 'Server error while fetching company.' });
+    res.status(500).json({ message: 'Server error while fetching company.' });
   }
 };
 
-// @desc Update company profile
-export const updateCompany = async (req: any, res: Response) => {
-  try {
-    const userId = req.user.id;
-    const { name, industry, description, logo_url } = req.body;
+/**
+ * Update company profile
+ */
+export const updateCompany = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const userId = req.user?.id;
 
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: No user ID.' });
+    return;
+  }
+
+  const { name, industry, description, logo_url } = req.body;
+
+  try {
     const result = await pool.query(
       `
       UPDATE companies
@@ -65,53 +100,71 @@ export const updateCompany = async (req: any, res: Response) => {
       WHERE user_id = $5
       RETURNING *
       `,
-      [name, industry, description, logo_url, userId]
+      [name, industry, description, logo_url || null, userId]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Company not found or unauthorized.' });
+      res.status(404).json({ message: 'Company not found or unauthorized.' });
+      return;
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       message: 'Company updated successfully',
       company: result.rows[0],
     });
   } catch (err) {
     console.error('Update Company Error:', err);
-    return res.status(500).json({ message: 'Server error while updating company.' });
+    res.status(500).json({ message: 'Server error while updating company.' });
   }
 };
 
-// @desc Delete company profile
-export const deleteCompany = async (req: any, res: Response) => {
-  try {
-    const userId = req.user.id;
+/**
+ * Delete company profile
+ */
+export const deleteCompany = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const userId = req.user?.id;
 
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: No user ID.' });
+    return;
+  }
+
+  try {
     const result = await pool.query(
       `DELETE FROM companies WHERE user_id = $1 RETURNING *`,
       [userId]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Company not found or already deleted.' });
+      res.status(404).json({ message: 'Company not found or already deleted.' });
+      return;
     }
 
-    return res.status(200).json({ message: 'Company deleted successfully' });
+    res.status(200).json({ message: 'Company deleted successfully' });
   } catch (err) {
     console.error('Delete Company Error:', err);
-    return res.status(500).json({ message: 'Server error while deleting company.' });
+    res.status(500).json({ message: 'Server error while deleting company.' });
   }
 };
 
-// @desc Search companies based on query
-export const searchCompanies = async (req: Request, res: Response) => {
+/**
+ * Search companies based on query
+ */
+export const searchCompanies = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const query = req.query.query;
+
+  if (!query || typeof query !== 'string') {
+    res.status(400).json({ message: 'Missing or invalid query parameter.' });
+    return;
+  }
+
   try {
-    const { query } = req.query;
-
-    if (!query || typeof query !== 'string') {
-      return res.status(400).json({ message: 'Missing or invalid query parameter.' });
-    }
-
     const result = await pool.query(
       `
       SELECT DISTINCT c.id, c.name, c.industry, c.description
@@ -124,26 +177,38 @@ export const searchCompanies = async (req: Request, res: Response) => {
       [`%${query}%`]
     );
 
-    return res.status(200).json({ companies: result.rows });
+    res.status(200).json({ companies: result.rows });
   } catch (err) {
     console.error('Search Companies Error:', err);
-    return res.status(500).json({ message: 'Search failed. Please try again.' });
+    res.status(500).json({ message: 'Search failed. Please try again.' });
   }
 };
 
-// @desc Upload company logo to Supabase and store public URL
-export const uploadLogo = async (req: any, res: Response) => {
+/**
+ * Upload company logo to Supabase and update DB with public URL
+ */
+export const uploadLogo = async (
+  req: AuthenticatedRequest & { file?: Express.Multer.File },
+  res: Response
+): Promise<void> => {
+  const userId = req.user?.id;
+  const file = req.file;
+
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: No user ID.' });
+    return;
+  }
+
+  if (!file) {
+    res.status(400).json({ message: 'No file uploaded.' });
+    return;
+  }
+
   try {
-    const userId = req.user.id;
-    const file = req.file;
-
-    if (!file) {
-      return res.status(400).json({ message: 'No file uploaded.' });
-    }
-
     const companyRes = await pool.query(`SELECT id FROM companies WHERE user_id = $1`, [userId]);
     if (companyRes.rows.length === 0) {
-      return res.status(404).json({ message: 'Company not found.' });
+      res.status(404).json({ message: 'Company not found.' });
+      return;
     }
 
     const companyId = companyRes.rows[0].id;
@@ -157,7 +222,8 @@ export const uploadLogo = async (req: any, res: Response) => {
 
     if (uploadError) {
       console.error('Supabase Upload Error:', uploadError.message);
-      return res.status(500).json({ message: 'Failed to upload logo to Supabase.' });
+      res.status(500).json({ message: 'Failed to upload logo to Supabase.' });
+      return;
     }
 
     const { data: publicUrlData } = supabase
@@ -172,12 +238,12 @@ export const uploadLogo = async (req: any, res: Response) => {
       [logoUrl, companyId]
     );
 
-    return res.status(200).json({
+    res.status(200).json({
       message: 'Logo uploaded successfully',
       logo_url: logoUrl,
     });
   } catch (err) {
     console.error('Upload Logo Error:', err);
-    return res.status(500).json({ message: 'Upload failed.' });
+    res.status(500).json({ message: 'Upload failed.' });
   }
 };

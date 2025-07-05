@@ -33,7 +33,7 @@ export default function UploadLogoPage() {
       formData.append("logo", logo);
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE}/api/company/upload-logo`,
+  `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/upload-logo`,
         {
           method: "POST",
           headers: {

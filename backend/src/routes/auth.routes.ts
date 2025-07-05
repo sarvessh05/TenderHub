@@ -1,6 +1,4 @@
-// routes/auth.routes.ts
-
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { signupUser, loginUser } from '../controllers/auth.controller';
 import { verifyToken, AuthenticatedRequest } from '../middleware/verifyToken';
 
@@ -21,9 +19,8 @@ router.post('/login', loginUser);
 /**
  * @route   GET /api/auth/me
  * @desc    Get authenticated user details
- * @access  Protected
  */
-router.get('/me', verifyToken, (req: AuthenticatedRequest, res: Response) => {
+router.get('/me', verifyToken, (req: AuthenticatedRequest, res: express.Response) => {
   res.status(200).json({
     message: 'Welcome! You are authorised.',
     user: req.user,
@@ -34,8 +31,8 @@ router.get('/me', verifyToken, (req: AuthenticatedRequest, res: Response) => {
  * @route   GET /api/auth/test
  * @desc    Test route for CORS or health check
  */
-router.get('/test', (_req: Request, res: Response) => {
-  res.status(200).json({ message: 'CORS test passed!' });
+router.get('/test', (_req, res) => {
+  res.json({ message: 'CORS test passed!' });
 });
 
-export default router;
+export default router; // ✅ Must come after all route definitions

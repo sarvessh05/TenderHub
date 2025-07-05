@@ -32,13 +32,16 @@ export default function UploadLogoPage() {
       const formData = new FormData();
       formData.append("logo", logo);
 
-      const res = await fetch("http://localhost:5000/api/company/upload-logo", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/company/upload-logo`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       const data = await res.json();
 

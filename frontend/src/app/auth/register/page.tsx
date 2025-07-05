@@ -27,14 +27,14 @@ export default function RegisterPage() {
       const { email, password } = form;
 
       await axios.post(
-        "http://localhost:5000/api/auth/signup",
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  `${import.meta.env.VITE_API_BASE}/api/auth/signup`,
+  { email, password },
+  {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }
+);
 
       toast.success("Registration successful!");
       router.push("/auth/login");

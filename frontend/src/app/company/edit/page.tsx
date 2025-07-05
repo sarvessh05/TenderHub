@@ -19,7 +19,7 @@ export default function EditCompanyPage() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/company/me`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -46,7 +46,7 @@ export default function EditCompanyPage() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/company/update`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/company/update`, { 
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
